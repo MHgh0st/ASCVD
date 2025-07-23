@@ -17,7 +17,6 @@ const Page = () => {
       const data = (await AscvdCalculator(formData)) as AscvdResult;
       setResults(data);
       setStep(2);
-      // console.log("data: ", data);
     }
 
     setIsLoading(false);

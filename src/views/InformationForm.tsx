@@ -110,7 +110,7 @@ const InformationForm = (props: {
     return null;
   };
   return (
-    <div className="text-right ">
+    <>
       {/* Title */}
       <div className="flex items-end gap-2">
         <h1 className="font-bold text-3xl">تست سلامت قلبی و عروقی (ASCVD)</h1>
@@ -262,7 +262,7 @@ const InformationForm = (props: {
           ثبت اطلاعات و دیدن نتایج
         </Button>
       </Form>
-    </div>
+    </>
   );
 };
 

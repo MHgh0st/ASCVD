@@ -5,7 +5,7 @@ export default heroui({
       colors: {
         primary: {
           "100": "#fbb6b3",
-          "200": "##f9aaa7",
+          "200": "#f9aaa7",
           "300": "#f79d9a",
           "400": "#f5918e",
           "500": "#F28482",
