@@ -14,6 +14,7 @@ type RadioButtonGroupProps = {
   label: string;
   options: Options[];
   selectedValue: "male" | "female" | "yes" | "no";
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onValueChange: (value: any) => void;
 };
 
@@ -58,6 +59,7 @@ const InformationForm = (props: {
     bloodPreasureMedicine: "no",
   });
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleChange = React.useCallback((key: string, value: any) => {
     setFormData((prev) => ({ ...prev, [key]: value }));
   }, []);
