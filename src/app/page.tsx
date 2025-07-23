@@ -9,7 +9,10 @@ import { AscvdCalculator } from "@/app/server/actions";
 const Page = () => {
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
-  const [results, setResults] = useState<AscvdResult>();
+  const [results, setResults] = useState<AscvdResult>({
+    final_risk: 0,
+    risk_category: "low",
+  });
 
   const onSubmit = async (formData: AscvdData) => {
     if (step === 1) {

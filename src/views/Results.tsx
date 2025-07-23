@@ -3,7 +3,7 @@ const GaugeComponent = dynamic(() => import("react-gauge-component"), {
   ssr: false,
 });
 import { AscvdResult } from "@/types/types";
-export default function Results(props: { results: AscvdResult | undefined }) {
+export default function Results(props: { results: AscvdResult }) {
   const final_risk = props.results?.final_risk;
   const risk_category = props.results?.risk_category;
 
