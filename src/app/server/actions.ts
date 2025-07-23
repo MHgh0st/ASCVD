@@ -3,7 +3,7 @@
 import type { AscvdData } from "@/types/types";
 
 export async function AscvdCalculator(Data: AscvdData) {
-  const result = await fetch("http://localhost:3000/api/calculator", {
+  const result = await fetch("https://ascvdupdates.vercel.app/api/calculator", {
     method: "POST",
     body: JSON.stringify(Data),
     headers: {
