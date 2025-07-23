@@ -9,13 +9,17 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@heroui/react": "^2.8.1",
+    "framer-motion": "^12.23.6",
     "next": "15.4.2",
+    "postcss": "^8.5.6",
     "prettier": "^3.6.2",
     "react": "19.1.0",
     "react-dom": "19.1.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@iconify/react": "^6.0.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
