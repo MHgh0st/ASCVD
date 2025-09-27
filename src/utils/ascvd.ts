@@ -4,7 +4,7 @@ export default function AscvdCalculator(data: AscvdData) {
   const age = data.age;
   const total_chol = data.cholesterol;
   const hdl_chol = data.HDLCholesterol;
-  const systolic_bp = data.bloodPreasuer;
+  const systolic_bp = data.bloodPressureSystolic;
   const is_smoker = data.smoke === "yes" ? 1 : 0;
   const has_diabetes = data.diabetes === "yes" ? 1 : 0;
   const on_bp_meds = data.bloodPreasureMedicine === "yes" ? 1 : 0;

@@ -1,7 +1,7 @@
 "use client";
 import { Icon } from "@iconify/react";
 import { Form, NumberInput, Button, ButtonGroup } from "@heroui/react";
-import React, { useState } from "react";
+import React from "react";
 import type { AscvdData } from "@/types/types";
 
 type Options = {
@@ -13,9 +13,8 @@ type Options = {
 type RadioButtonGroupProps = {
   label: string;
   options: Options[];
-  selectedValue: "male" | "female" | "yes" | "no";
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onValueChange: (value: any) => void;
+  selectedValue: "male" | "female" | "yes" | "no" | "former";
+  onValueChange: (value: "male" | "female" | "yes" | "no" | "former") => void;
 };
 
 const RadioButtonGroup = React.memo<RadioButtonGroupProps>(
@@ -27,11 +26,15 @@ const RadioButtonGroup = React.memo<RadioButtonGroupProps>(
           {options.map((option) => (
             <Button
               key={option.value}
-              onPress={() => onValueChange(option.value)}
+              onPress={() => onValueChange(option.value as any)}
               variant={selectedValue === option.value ? "solid" : "light"}
               color="secondary"
               startContent={<Icon icon={option.icon} className="text-xl" />}
-              className={`!justify-end !py-3 !px-6 ${selectedValue === option.value ? "bg-content1 text-secondary" : "text-secondary"}`}
+              className={`!justify-end !py-3 !px-6 ${
+                selectedValue === option.value
+                  ? "bg-content1 text-secondary"
+                  : "text-secondary"
+              }`}
             >
               {option.label}
             </Button>
@@ -41,79 +44,101 @@ const RadioButtonGroup = React.memo<RadioButtonGroupProps>(
     );
   }
 );
-
 RadioButtonGroup.displayName = "RadioButtonGroup";
+
+interface NumberInputConfig {
+  name: keyof AscvdData;
+  label: string;
+  placeholder: string;
+  min: number;
+  max: number;
+  rangeErrorMessage: string;
+}
+
+const numberInputFields: NumberInputConfig[] = [
+  {
+    name: "age",
+    label: "سن",
+    placeholder: "58",
+    min: 40,
+    max: 79,
+    rangeErrorMessage: "سن باید بین 40 تا 79 سال باشد",
+  },
+  {
+    name: "cholesterol",
+    label: "سطح کلسترول تام (mg/dl)",
+    placeholder: "141",
+    min: 100,
+    max: 400,
+    rangeErrorMessage: "سطح کلسترول باید بین 100 تا 400 mg/dl باشد",
+  },
+  {
+    name: "HDLCholesterol",
+    label: "سطح کلسترول HDL (mg/dl)",
+    placeholder: "34",
+    min: 20,
+    max: 100,
+    rangeErrorMessage: "سطح کلسترول HDL باید بین 20 تا 100 mg/dl باشد",
+  },
+  {
+    name: "LDLCholesterol",
+    label: "سطح کلسترول بد LDL (mg/dl)",
+    placeholder: "50",
+    min: 20,
+    max: 100,
+    rangeErrorMessage: "سطح کلسترول بد LDL باید بین 20 تا 100 mg/dl باشد",
+  },
+  {
+    name: "bloodPressureSystolic",
+    label: "فشار خون سیستولیک",
+    placeholder: "150",
+    min: 80,
+    max: 250,
+    rangeErrorMessage: "فشار خون سیستولیک باید بین 80 تا 250 mmHg باشد",
+  },
+  {
+    name: "bloodPressureDiastolic",
+    label: "فشار خون دیاستولیک",
+    placeholder: "150",
+    min: 80,
+    max: 250,
+    rangeErrorMessage: "فشار خون دیاستولیک باید بین 80 تا 250 mmHg باشد",
+  },
+];
 
 const InformationForm = (props: {
   onSubmit: (data: AscvdData) => void;
   isLoading: boolean;
 }) => {
-  const [formData, setFormData] = useState<AscvdData>({
+  const [formData, setFormData] = React.useState<AscvdData>({
     age: 58,
     cholesterol: 141,
-    bloodPreasuer: 150,
+    bloodPressureSystolic: 150,
+    bloodPressureDiastolic: 90,
     HDLCholesterol: 34,
+    LDLCholesterol: 50,
     sex: "male",
     diabetes: "no",
     smoke: "no",
     bloodPreasureMedicine: "no",
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleChange = React.useCallback((key: string, value: any) => {
+  const handleChange = React.useCallback((key: keyof AscvdData, value: any) => {
     setFormData((prev) => ({ ...prev, [key]: value }));
   }, []);
 
-  const ageErrors = (age: number) => {
-    if (age < 30 || age > 99) {
-      return "سن باید بین 30 تا 99 سال باشد";
-    } else if (age === null || age === undefined || isNaN(age)) {
-      return "وارد کردن سن الزامی است";
+  const validateNumericField = (value: number, config: NumberInputConfig) => {
+    if (value === null || value === undefined || isNaN(value)) {
+      return `وارد کردن ${config.label} الزامی است`;
+    }
+    if (value < config.min || value > config.max) {
+      return config.rangeErrorMessage;
     }
     return null;
   };
 
-  const cholesterolErrors = (cholesterol: number) => {
-    if (cholesterol < 100 || cholesterol > 400) {
-      return "سطح کلسترول باید بین 100 تا 400 mg/dl باشد";
-    } else if (
-      cholesterol === null ||
-      cholesterol === undefined ||
-      isNaN(cholesterol)
-    ) {
-      return "وارد کردن سطح کلسترول الزامی است";
-    }
-    return null;
-  };
-
-  const HDLcholesterolErrors = (HDLCholesterol: number) => {
-    if (HDLCholesterol < 20 || HDLCholesterol > 100) {
-      return "سطح کلسترول HDL باید بین 20 تا 100 mg/dl باشد";
-    } else if (
-      HDLCholesterol === null ||
-      HDLCholesterol === undefined ||
-      isNaN(HDLCholesterol)
-    ) {
-      return "وارد کردن سطح کلسترول HDL الزامی است";
-    }
-    return null;
-  };
-
-  const bloodPreasuerErrors = (bloodPreasuer: number) => {
-    if (bloodPreasuer < 80 || bloodPreasuer > 250) {
-      return "فشار خون سیستولیک باید بین 80 تا 250 mmHg باشد";
-    } else if (
-      bloodPreasuer === null ||
-      bloodPreasuer === undefined ||
-      isNaN(bloodPreasuer)
-    ) {
-      return "وارد کردن فشار خون سیستولیک الزامی است";
-    }
-    return null;
-  };
   return (
     <>
-      {/* Title */}
       <div className="flex items-end gap-2">
         <h1 className="font-bold text-3xl">تست سلامت قلبی و عروقی (ASCVD)</h1>
         <span>
@@ -131,56 +156,26 @@ const InformationForm = (props: {
           props.onSubmit(formData);
         }}
       >
-        {/* ستون راست */}
         <div className="col-span-1 md:col-span-6 flex flex-col gap-10 mt-2 max-w-64">
-          <NumberInput
-            isRequired
-            label="سن"
-            errorMessage={ageErrors(formData.age)}
-            isInvalid={ageErrors(formData.age) !== null}
-            labelPlacement="outside"
-            // value={formData.age}
-            placeholder="58"
-            onValueChange={(value) => {
-              handleChange("age", value);
-            }}
-          />
-          <NumberInput
-            isRequired
-            label="سطح کلسترول (mg/dl)"
-            errorMessage={cholesterolErrors(formData.cholesterol)}
-            isInvalid={cholesterolErrors(formData.cholesterol) !== null}
-            labelPlacement="outside"
-            // value={formData.cholesterol}
-            placeholder="141"
-            onValueChange={(value) => {
-              handleChange("cholesterol", value);
-            }}
-          />
-          <NumberInput
-            isRequired
-            label="سطح کلسترول HDL (mg/dl)"
-            errorMessage={HDLcholesterolErrors(formData.HDLCholesterol)}
-            isInvalid={HDLcholesterolErrors(formData.HDLCholesterol) !== null}
-            labelPlacement="outside"
-            // value={formData.HDLCholesterol}
-            placeholder="34"
-            onValueChange={(value) => {
-              handleChange("HDLCholesterol", value);
-            }}
-          />
-          <NumberInput
-            isRequired
-            label="فشار خون سیستولیک"
-            errorMessage={bloodPreasuerErrors(formData.bloodPreasuer)}
-            isInvalid={bloodPreasuerErrors(formData.bloodPreasuer) !== null}
-            labelPlacement="outside"
-            // value={formData.bloodPreasuer}
-            placeholder="150"
-            onValueChange={(value) => {
-              handleChange("bloodPreasuer", value);
-            }}
-          />
+          {numberInputFields.map((field) => {
+            const errorMessage = validateNumericField(
+              formData[field.name] as number,
+              field
+            );
+            return (
+              <NumberInput
+                key={field.name}
+                hideStepper
+                isRequired
+                label={field.label}
+                placeholder={field.placeholder}
+                errorMessage={errorMessage}
+                isInvalid={errorMessage !== null}
+                labelPlacement="outside"
+                onValueChange={(value) => handleChange(field.name, value)}
+              />
+            );
+          })}
         </div>
 
         {/* ستون چپ */}
@@ -224,6 +219,11 @@ const InformationForm = (props: {
                 icon: "solar:check-square-bold-duotone",
               },
               {
+                label: "قبلا میکشیدم",
+                value: "former",
+                icon: "solar:clock-square-bold-duotone",
+              },
+              {
                 label: "خیر",
                 value: "no",
                 icon: "solar:close-square-bold-duotone",
@@ -251,18 +251,18 @@ const InformationForm = (props: {
               handleChange("bloodPreasureMedicine", value)
             }
           />
+          <Button
+            color="primary"
+            className="text-content3 w-fit mt-4"
+            type="submit"
+            endContent={
+              <Icon icon="solar:arrow-left-bold-duotone" className="text-xl" />
+            }
+            isLoading={props.isLoading}
+          >
+            ثبت اطلاعات و دیدن نتایج
+          </Button>
         </div>
-        <Button
-          color="primary"
-          className="text-content3 col-span-4"
-          type="submit"
-          endContent={
-            <Icon icon="solar:arrow-left-bold-duotone" className="text-xl" />
-          }
-          isLoading={props.isLoading}
-        >
-          ثبت اطلاعات و دیدن نتایج
-        </Button>
       </Form>
     </>
   );
