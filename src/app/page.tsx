@@ -2,21 +2,17 @@
 import InformationForm from "@/views/InformationForm";
 import Results from "@/views/Results";
 import Stepper from "@/components/stepper";
-import MobileForm from "@/components/MobileFrom";
+import RegisterForm from "@/components/RegisterFrom";
 import Advices from "@/views/Advices";
 import { useState } from "react";
 import { AscvdData, AscvdResult } from "@/types/types";
 import { AscvdCalculator } from "@/app/server/actions";
-import type { MobileFormData } from "@/types/types";
-import { addToast } from "@heroui/react";
-import { Icon } from "@iconify/react";
 import { getAdvices } from "@/app/server/actions";
 import type { Advice } from "@/types/AdviceTypes";
 
 const Page = () => {
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
-  const [isMobileFormOpen, setIsMobileFormOpen] = useState(true);
   const [results, setResults] = useState<AscvdResult>({
     final_risk: 0,
     risk_category: "low",
@@ -59,32 +55,9 @@ const Page = () => {
   const onBack = () => {
     if (step > 1) {
       setStep(step - 1);
-      console.log("going back to step", step - 1);
-      console.log("current formData when going back:", formData);
     }
   };
 
-  // Helper function to handle step navigation with form data persistence
-  const navigateToStep = (targetStep: number) => {
-    setStep(targetStep);
-  };
-
-  const SubmitMobileForm = (data: MobileFormData) => {
-    // TODO: در اینجا باید api مربوط به ثبت نام کاربر رو فراخوانی کنی
-    console.log("Mobile Form Data:", data);
-    addToast({
-      title: "ثبت نام با موفقیت انجام شد!",
-      description: "برای دیدن تست های خود، وارد شوید.",
-      color: "success",
-      variant: "flat",
-      icon: (
-        <Icon icon="solar:check-square-bold-duotone" className="text-2xl" />
-      ),
-      timeout: 4000,
-      shouldShowTimeoutProgress: true,
-    });
-    setIsMobileFormOpen(false);
-  };
   return (
     <>
       <div className="max-w-[940px] mx-auto mt-6 grid grid-cols-12">
@@ -111,10 +84,6 @@ const Page = () => {
         <div className="col-span-9">
           {step === 1 && (
             <>
-              {console.log(
-                "Page: Rendering InformationForm with initialData:",
-                formData
-              )}
               <InformationForm
                 onSubmit={onSubmit}
                 isLoading={isLoading}
@@ -127,10 +96,7 @@ const Page = () => {
           )}
           {step === 3 && (
             <>
-              {/* <MobileForm
-                isOpen={isMobileFormOpen}
-                onSubmit={SubmitMobileForm}
-              /> */}
+              <RegisterForm />
               <Advices onBack={onBack} advices={advices} />
             </>
           )}

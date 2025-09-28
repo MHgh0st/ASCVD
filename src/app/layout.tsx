@@ -41,8 +41,11 @@ export default function RootLayout({
   return (
     <html lang="fa" dir="rtl" className={`${Vazir.className} text-content3`}>
       <body>
-        <CustomNavbar />
-        <Providers>{children}</Providers>
+        <Providers>
+          <CustomNavbar />
+
+          {children}
+        </Providers>
       </body>
     </html>
   );

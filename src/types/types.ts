@@ -1,3 +1,6 @@
+import { DefaultSession, DefaultUser } from "next-auth";
+import { JWT, DefaultJWT } from "next-auth/jwt";
+
 export enum QuitDuration {
   LESS_THAN_ONE_MONTH = "کمتر از یک ماه",
   LESS_THAN_SIX_MONTHS = "کمتر از 6 ماه",
@@ -24,8 +27,33 @@ export type AscvdResult = {
   risk_category: RiskType;
 };
 
-export type MobileFormData = {
+export type RegisterFormData = {
   name: string;
   phone: string;
   password: string;
 };
+
+declare module "next-auth" {
+  interface Session {
+    user: {
+      id: string;
+      phone: string;
+    } & DefaultSession["user"];
+  }
+  interface User extends DefaultUser {
+    phone: string;
+  }
+}
+
+declare module "next-auth/jwt" {
+  interface JWT extends DefaultJWT {
+    id: string;
+    phone: string;
+  }
+}
+
+export interface User {
+  id: string;
+  name?: string | null;
+  phone: string;
+}

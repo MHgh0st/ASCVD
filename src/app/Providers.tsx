@@ -1,16 +1,18 @@
 "use client";
 import { HeroUIProvider, ToastProvider } from "@heroui/react";
-
+import SessionProvider from "@/utils/SessionProvder";
 const Providers = ({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) => {
   return (
-    <HeroUIProvider>
-      <ToastProvider />
-      {children}
-    </HeroUIProvider>
+    <SessionProvider>
+      <HeroUIProvider>
+        <ToastProvider />
+        {children}
+      </HeroUIProvider>
+    </SessionProvider>
   );
 };
 

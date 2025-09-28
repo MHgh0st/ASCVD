@@ -121,12 +121,12 @@ const InformationForm = (props: {
 }) => {
   const [formData, setFormData] = React.useState<AscvdData>(
     props.initialData || {
-      age: 58,
-      cholesterol: 141,
-      bloodPressureSystolic: 150,
-      bloodPressureDiastolic: 90,
-      HDLCholesterol: 34,
-      LDLCholesterol: 50,
+      age: 0,
+      cholesterol: 0,
+      bloodPressureSystolic: 0,
+      bloodPressureDiastolic: 0,
+      HDLCholesterol: 0,
+      LDLCholesterol: 0,
       sex: "male",
       diabetes: "no",
       smoke: "no",

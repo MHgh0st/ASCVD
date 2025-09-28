@@ -9,19 +9,15 @@ import {
 } from "@heroui/react";
 import { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
-import type { MobileFormData } from "@/types/types";
+import type { RegisterFormData } from "@/types/types";
+import Toast from "@/components/Toast";
 
 // 1. تایپ onSubmit رو به‌روزرسانی می‌کنیم تا داده‌ها رو هم ارسال کنه
-export default function MobileForm({
-  isOpen,
-  onSubmit,
-}: {
-  isOpen: boolean;
-  onSubmit: (data: MobileFormData) => void;
-}) {
+export default function RegisterForm() {
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [timer, setTimer] = useState(0);
+  const [isOpen, setIsOpen] = useState(true);
 
   // Initialize react-hook-form
   const {
@@ -33,7 +29,7 @@ export default function MobileForm({
     setError,
     clearErrors,
     formState: { errors },
-  } = useForm<MobileFormData & { otp: string }>({
+  } = useForm<RegisterFormData & { otp: string }>({
     defaultValues: {
       name: "",
       phone: "",
@@ -125,6 +121,37 @@ export default function MobileForm({
     return isValid;
   };
 
+  const handleRegister = async (data: RegisterFormData) => {
+    // TODO: در اینجا باید api مربوط به ثبت نام کاربر رو فراخوانی کنی
+    const response = await fetch("/api/auth/register", {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      const resData = await response.json();
+      const errorMessage =
+        typeof resData.error === "object"
+          ? resData.error.message
+          : resData.error;
+      Toast({
+        message:
+          errorMessage || "خطایی در ثبت‌نام رخ داد. لطفا دوباره تلاش کنید.",
+        type: "error",
+      });
+      return;
+    }
+    // console.log("Mobile Form Data:", data);
+    Toast({
+      title: "ثبت نام با موفقیت انجام شد",
+      message: "برای دیدن تست های خود وارد صفحه پروفایل شوید",
+      type: "success",
+    });
+    setIsOpen(false);
+  };
+
   const handleRequestOtp = () => {
     if (validateStep1()) {
       setIsLoading(true);
@@ -139,16 +166,21 @@ export default function MobileForm({
     }
   };
 
-  const handleVerifyOtp = () => {
+  const handleVerifyOtp = async () => {
     if (validateStep2()) {
       setIsLoading(true);
-      // TODO: در اینجا باید API تأیید OTP رو صدا بزنی
-      console.log("Verifying OTP:", formData.otp);
-      // شبیه‌سازی تأخیر شبکه
-      setTimeout(() => {
+      // console.log("Verifying OTP:", formData.otp);
+      if (formData.otp === "12345") {
+        await handleRegister(formData);
         setIsLoading(false);
-        onSubmit(formData); // ارسال تمام داده‌ها به والد
-      }, 1000);
+      } else {
+        setTimeout(() => {
+          setIsLoading(false);
+          setError("otp", {
+            message: "کد تایید اشتباه است. لطفا دوباره تلاش کنید.",
+          });
+        }, 1000);
+      }
     }
   };
 
@@ -160,7 +192,7 @@ export default function MobileForm({
     }
   };
 
-  const onFormSubmit = (data: MobileFormData & { otp: string }) => {
+  const onFormSubmit = (data: RegisterFormData & { otp: string }) => {
     if (step === 1) {
       handleRequestOtp();
     } else {
@@ -169,7 +201,7 @@ export default function MobileForm({
   };
 
   const handleValueChange = (
-    field: keyof MobileFormData,
+    field: keyof RegisterFormData,
     value: string | number
   ) => {
     setValue(field, String(value));
