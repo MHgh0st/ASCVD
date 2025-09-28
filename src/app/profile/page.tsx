@@ -7,14 +7,10 @@ import {
   Card,
   CardHeader,
   CardBody,
-  CardFooter,
-  Button,
   Skeleton,
   Chip,
   Divider,
   Avatar,
-  Listbox,
-  ListboxItem,
   Accordion,
   AccordionItem,
 } from "@heroui/react";
@@ -167,21 +163,25 @@ const ProfilePage = () => {
   };
 
   return (
-    <div className=" mx-auto p-4 md:p-8 ">
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold mb-2">پروفایل کاربر</h1>
-        <p className="text-gray-600">مشاهده اطلاعات شخصی و تاریخچه تست‌ها</p>
+    <div className="mx-auto p-4 md:p-8 max-w-7xl">
+      <div className="text-center mb-6 md:mb-8">
+        <h1 className="text-2xl md:text-3xl font-bold mb-2">پروفایل کاربر</h1>
+        <p className="text-sm md:text-base text-gray-600">
+          مشاهده اطلاعات شخصی و تاریخچه تست‌ها
+        </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8">
         {/* Right Column (Smaller) - User Information */}
-        <div className="md:col-span-3 ">
+        <div className="lg:col-span-3 md:col-span-4 order-0">
           <Card
             shadow="none"
-            className="bg-transparent border-2 border-primary sticky top-20"
+            className="bg-transparent border-2 border-primary"
           >
             <CardHeader>
-              <h2 className="text-2xl font-semibold">اطلاعات کاربر</h2>
+              <h2 className="text-xl md:text-2xl font-semibold">
+                اطلاعات کاربر
+              </h2>
             </CardHeader>
             <CardBody className="space-y-4">
               <div className="flex items-center space-x-3 text-right">
@@ -212,7 +212,7 @@ const ProfilePage = () => {
           </Card>
         </div>
         {/* Left Column (Wider) - Test History */}
-        <div className="md:col-span-9">
+        <div className="md:col-span-8 lg:col-span-9">
           <Card
             shadow="none"
             className="bg-transparent border-2 border-primary"
@@ -449,7 +449,7 @@ const ProfilePage = () => {
                     <AccordionItem
                       key={advice.id}
                       title={advice.title}
-                      className="shadow-none"
+                      className="shadow-none bg-default/50"
                     >
                       <div className="space-y-2">
                         <p className="text-gray-700 text-right">

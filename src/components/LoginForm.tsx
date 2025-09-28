@@ -80,12 +80,13 @@ export default function LoginForm({
     <Modal
       isOpen={isOpen}
       backdrop="blur"
+      size="sm"
       onClose={() => {
         onClose();
       }}
     >
-      <ModalContent className="flex flex-col justify-center items-center gap-y-2 p-5 text-content3">
-        <p className="text-3xl font-bold">ورود به حساب کاربری</p>
+      <ModalContent className="flex flex-col justify-center items-center gap-y-2 p-4 md:p-6 text-content3">
+        <p className="text-2xl md:text-3xl font-bold">ورود به حساب کاربری</p>
         <Form
           validationBehavior="aria"
           className="w-full flex flex-col justify-center items-center"

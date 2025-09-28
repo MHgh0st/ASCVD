@@ -27,7 +27,7 @@ const Stepper: React.FC<StepperProps> = ({
 
         return (
           // هر مرحله یک ردیف در یک کانتینر فلکس است
-          <div key={step.id} className="flex justify-start gap-x-4">
+          <div key={step.id} className="justify-start gap-x-4 hidden md:flex">
             {/* بخش آیکون و خط اتصال‌دهنده */}
             <div className="flex flex-col items-center">
               {/* آیکون مربع شکل */}

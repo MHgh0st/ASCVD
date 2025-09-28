@@ -24,11 +24,14 @@ const CustomNavbar = () => {
 
   return (
     <>
-      <Navbar maxWidth="full">
+      <Navbar maxWidth="full" className="px-4">
         <NavbarBrand>
-          <Link href="/">
-            <img src="logo.png" alt="" width={48} />
-            <p style={{ color: "#1F7674" }} className="-mb-4 text-xl">
+          <Link href="/" className="flex items-center gap-2">
+            <img src="logo.png" alt="" className="w-8 h-8 md:w-12 md:h-12" />
+            <p
+              style={{ color: "#1F7674" }}
+              className="-mb-1 text-lg md:text-xl"
+            >
               هــــیلان
             </p>
           </Link>
@@ -37,9 +40,12 @@ const CustomNavbar = () => {
           {status === "unauthenticated" && (
             <Button
               color="primary"
-              className="text-content3 "
+              className="text-content3 text-sm md:text-base"
               startContent={
-                <Icon icon="solar:login-3-bold-duotone" className="size-5" />
+                <Icon
+                  icon="solar:login-3-bold-duotone"
+                  className="size-4 md:size-5"
+                />
               }
               onPress={handleLoginClick}
             >
@@ -50,17 +56,17 @@ const CustomNavbar = () => {
             <Dropdown>
               <DropdownTrigger>
                 <Button
-                  className="text-sm font-bold"
+                  className="text-xs md:text-sm font-bold max-w-32 md:max-w-none"
                   variant="light"
                   color="secondary"
                   startContent={
                     <Icon
                       icon={`solar:user-circle-bold-duotone`}
-                      className="size-14"
+                      className="size-8 md:size-14"
                     />
                   }
                 >
-                  {session.user.name}
+                  <span className="truncate">{session.user.name}</span>
                 </Button>
               </DropdownTrigger>
               <DropdownMenu color="secondary">

@@ -12,6 +12,7 @@ export default function Results(props: {
   results: AscvdResult;
   onSubmit: () => void;
   onBack?: () => void;
+  testAlreadySaved?: boolean;
 }) {
   const { data: session, status } = useSession();
   const [isSaving, setIsSaving] = useState(false);
@@ -34,10 +35,18 @@ export default function Results(props: {
 
   // Handle saving test data when component mounts and user is authenticated
   useEffect(() => {
+    // If test is already saved, show success status immediately
+    if (props.testAlreadySaved && status === "authenticated") {
+      setSaveStatus("success");
+      return;
+    }
+
+    // Otherwise, handle the normal save flow
     if (
       status === "authenticated" &&
       session?.user?.id &&
-      saveStatus === "idle"
+      saveStatus === "idle" &&
+      !props.testAlreadySaved
     ) {
       setSaveStatus("saving");
       setIsSaving(true);
@@ -48,7 +57,7 @@ export default function Results(props: {
         setIsSaving(false);
       }, 1500);
     }
-  }, [status, session, saveStatus]);
+  }, [status, session, saveStatus, props.testAlreadySaved]);
   return (
     <>
       {/* Save Status Indicator for Authenticated Users */}
@@ -92,19 +101,19 @@ export default function Results(props: {
       )}
 
       {/* Title */}
-      <div className="flex gap-2">
-        <h3 className="font-bold text-2xl">
+      <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
+        <h3 className="font-bold text-xl sm:text-2xl">
           درصد ریسک سلامت قلبی و عروقی شما:
         </h3>
         <span
-          className={`text-xl font-bold text-${risk_category === "low" ? "success" : risk_category === "borderline" ? "[#B5A200]" : risk_category === "intermediate" ? "warning" : "danger"}`}
+          className={`text-lg sm:text-xl font-bold text-${risk_category === "low" ? "success" : risk_category === "borderline" ? "[#B5A200]" : risk_category === "intermediate" ? "warning" : "danger"}`}
         >
           % {props.results?.final_risk}{" "}
         </span>
       </div>
 
-      <div className="flex items-end gap-2 mt-4">
-        <h4 className=" text-xl">
+      <div className="mt-4">
+        <h4 className="text-lg sm:text-xl">
           شما در دسته افراد با ریسک{" "}
           <span
             className={`text-${risk_category === "low" ? "success" : risk_category === "borderline" ? "[#B5A200]" : risk_category === "intermediate" ? "warning" : "danger"}`}

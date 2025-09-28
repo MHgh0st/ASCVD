@@ -163,7 +163,9 @@ const InformationForm = (props: {
   return (
     <>
       <div className="flex items-end gap-2">
-        <h1 className="font-bold text-3xl">تست سلامت قلبی و عروقی (ASCVD)</h1>
+        <h1 className="font-bold text-3xl text-center md:text-right">
+          تست سلامت قلبی و عروقی (ASCVD)
+        </h1>
         {/* <span>
           <Icon
             icon="solar:question-square-bold-duotone"
@@ -171,151 +173,156 @@ const InformationForm = (props: {
           />
         </span> */}
       </div>
-      <p className="mt-2 font-medium text-sm text-content3/60">
+      <p className="mt-2 font-medium text-sm text-content3/60 text-center md:text-right">
         این محاسبه گر تنها برای افرادی کاربرد دارد که سابقه هیچ گونه ابتلایی به
         بیماری های قلبی عروقی ناشی از آترواسکلروز از قبیل سکته قلبی و مغزی،
         ندارند.
       </p>
 
       <Form
-        className="grid grid-cols-1 md:grid-cols-12 gap-x-14 gap-y-14 mt-6 "
+        className="mt-6 justify-center items-center pb-4"
         onSubmit={(e) => {
           e.preventDefault();
           props.onSubmit(formData);
         }}
       >
-        <div className="col-span-1 md:col-span-6 flex flex-col gap-10 mt-2 max-w-64">
-          {numberInputFields.map((field) => {
-            const errorMessage = validateNumericField(
-              formData[field.name] as number,
-              field
-            );
-            return (
-              <NumberInput
-                key={field.name}
-                hideStepper
-                isRequired
-                label={field.label}
-                placeholder={field.placeholder}
-                errorMessage={errorMessage}
-                isInvalid={errorMessage !== null}
-                labelPlacement="outside"
-                value={formData[field.name] as number}
-                onValueChange={(value) => handleChange(field.name, value)}
-              />
-            );
-          })}
-        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-14">
+          <div className="flex flex-col gap-6 md:gap-10 mt-2">
+            {numberInputFields.map((field) => {
+              const errorMessage = validateNumericField(
+                formData[field.name] as number,
+                field
+              );
+              return (
+                <NumberInput
+                  key={field.name}
+                  hideStepper
+                  isRequired
+                  label={field.label}
+                  placeholder={field.placeholder}
+                  errorMessage={errorMessage}
+                  isInvalid={errorMessage !== null}
+                  labelPlacement="outside"
+                  value={formData[field.name] as number}
+                  onValueChange={(value) => handleChange(field.name, value)}
+                />
+              );
+            })}
+          </div>
 
-        {/* ستون چپ */}
-        <div className="col-span-1 md:col-span-6 flex flex-col gap-10">
-          <RadioButtonGroup
-            label="جنسیت"
-            options={[
-              { label: "مرد", value: "male", icon: "solar:men-bold-duotone" },
-              {
-                label: "زن",
-                value: "female",
-                icon: "solar:women-bold-duotone",
-              },
-            ]}
-            selectedValue={formData.sex}
-            onValueChange={(value) => handleChange("sex", value)}
-          />
-          <RadioButtonGroup
-            label="آیا سابقه دیابت دارید؟"
-            options={[
-              {
-                label: "بله",
-                value: "yes",
-                icon: "solar:check-square-bold-duotone",
-              },
-              {
-                label: "خیر",
-                value: "no",
-                icon: "solar:close-square-bold-duotone",
-              },
-            ]}
-            selectedValue={formData.diabetes}
-            onValueChange={(value) => handleChange("diabetes", value)}
-          />
-          <RadioButtonGroup
-            label="در حال حاضر سیگار میکشید؟"
-            options={[
-              {
-                label: "بله",
-                value: "yes",
-                icon: "solar:check-square-bold-duotone",
-              },
-              {
-                label: "قبلا میکشیدم",
-                value: "former",
-                icon: "solar:clock-square-bold-duotone",
-              },
-              {
-                label: "خیر",
-                value: "no",
-                icon: "solar:close-square-bold-duotone",
-              },
-            ]}
-            selectedValue={formData.smoke}
-            onValueChange={(value) => handleChange("smoke", value)}
-          />
+          {/* ستون چپ */}
+          <div className="flex flex-col gap-6 md:gap-10">
+            <RadioButtonGroup
+              label="جنسیت"
+              options={[
+                { label: "مرد", value: "male", icon: "solar:men-bold-duotone" },
+                {
+                  label: "زن",
+                  value: "female",
+                  icon: "solar:women-bold-duotone",
+                },
+              ]}
+              selectedValue={formData.sex}
+              onValueChange={(value) => handleChange("sex", value)}
+            />
+            <RadioButtonGroup
+              label="آیا سابقه دیابت دارید؟"
+              options={[
+                {
+                  label: "بله",
+                  value: "yes",
+                  icon: "solar:check-square-bold-duotone",
+                },
+                {
+                  label: "خیر",
+                  value: "no",
+                  icon: "solar:close-square-bold-duotone",
+                },
+              ]}
+              selectedValue={formData.diabetes}
+              onValueChange={(value) => handleChange("diabetes", value)}
+            />
+            <RadioButtonGroup
+              label="در حال حاضر سیگار میکشید؟"
+              options={[
+                {
+                  label: "بله",
+                  value: "yes",
+                  icon: "solar:check-square-bold-duotone",
+                },
+                {
+                  label: "قبلا میکشیدم",
+                  value: "former",
+                  icon: "solar:clock-square-bold-duotone",
+                },
+                {
+                  label: "خیر",
+                  value: "no",
+                  icon: "solar:close-square-bold-duotone",
+                },
+              ]}
+              selectedValue={formData.smoke}
+              onValueChange={(value) => handleChange("smoke", value)}
+            />
 
-          {formData.smoke === "former" && (
-            <Select
-              label="چه مدتیه که سیگار رو ترک کردید"
-              placeholder="مدت زمان ترک سیگار را انتخاب کنید"
-              selectedKeys={
-                formData.quitDuration ? [formData.quitDuration] : []
+            {formData.smoke === "former" && (
+              <Select
+                label="چه مدتیه که سیگار رو ترک کردید"
+                placeholder="مدت زمان ترک سیگار را انتخاب کنید"
+                selectedKeys={
+                  formData.quitDuration ? [formData.quitDuration] : []
+                }
+                onSelectionChange={(keys) => {
+                  const selectedValue = Array.from(keys)[0] as QuitDuration;
+                  handleChange("quitDuration", selectedValue);
+                }}
+              >
+                <SelectItem key={QuitDuration.LESS_THAN_ONE_MONTH}>
+                  کمتر از یک ماه
+                </SelectItem>
+                <SelectItem key={QuitDuration.LESS_THAN_SIX_MONTHS}>
+                  کمتر از 6 ماه
+                </SelectItem>
+                <SelectItem key={QuitDuration.MORE_THAN_SIX_MONTHS}>
+                  بیشتر از 6 ماه
+                </SelectItem>
+              </Select>
+            )}
+
+            <RadioButtonGroup
+              label="آیا داروی فشار خون مصرف میکنید؟"
+              options={[
+                {
+                  label: "بله",
+                  value: "yes",
+                  icon: "solar:check-square-bold-duotone",
+                },
+                {
+                  label: "خیر",
+                  value: "no",
+                  icon: "solar:close-square-bold-duotone",
+                },
+              ]}
+              selectedValue={formData.bloodPreasureMedicine}
+              onValueChange={(value) =>
+                handleChange("bloodPreasureMedicine", value)
               }
-              onSelectionChange={(keys) => {
-                const selectedValue = Array.from(keys)[0] as QuitDuration;
-                handleChange("quitDuration", selectedValue);
-              }}
+            />
+            <Button
+              color="primary"
+              className="text-content3 w-fit mt-4"
+              type="submit"
+              endContent={
+                <Icon
+                  icon="solar:arrow-left-bold-duotone"
+                  className="text-xl"
+                />
+              }
+              isLoading={props.isLoading}
             >
-              <SelectItem key={QuitDuration.LESS_THAN_ONE_MONTH}>
-                کمتر از یک ماه
-              </SelectItem>
-              <SelectItem key={QuitDuration.LESS_THAN_SIX_MONTHS}>
-                کمتر از 6 ماه
-              </SelectItem>
-              <SelectItem key={QuitDuration.MORE_THAN_SIX_MONTHS}>
-                بیشتر از 6 ماه
-              </SelectItem>
-            </Select>
-          )}
-
-          <RadioButtonGroup
-            label="آیا داروی فشار خون مصرف میکنید؟"
-            options={[
-              {
-                label: "بله",
-                value: "yes",
-                icon: "solar:check-square-bold-duotone",
-              },
-              {
-                label: "خیر",
-                value: "no",
-                icon: "solar:close-square-bold-duotone",
-              },
-            ]}
-            selectedValue={formData.bloodPreasureMedicine}
-            onValueChange={(value) =>
-              handleChange("bloodPreasureMedicine", value)
-            }
-          />
-          <Button
-            color="primary"
-            className="text-content3 w-fit mt-4"
-            type="submit"
-            endContent={
-              <Icon icon="solar:arrow-left-bold-duotone" className="text-xl" />
-            }
-            isLoading={props.isLoading}
-          >
-            ثبت اطلاعات و دیدن نتایج
-          </Button>
+              ثبت اطلاعات و دیدن نتایج
+            </Button>
+          </div>
         </div>
       </Form>
     </>

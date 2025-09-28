@@ -10,7 +10,7 @@ interface AdvicesProps {
 
 export default function Advices(props: AdvicesProps = { advices: [] }) {
   return (
-    <div className="flex flex-col gap-y-4">
+    <div className="flex flex-col gap-y-4 mt-6">
       {props.onBack && (
         <Button
           color="primary"
@@ -33,7 +33,9 @@ export default function Advices(props: AdvicesProps = { advices: [] }) {
       >
         {props.advices?.map((advice) => (
           <AccordionItem key={advice.id} title={advice.title}>
-            {advice.details}
+            <div className="text-sm sm:text-base leading-relaxed">
+              {advice.details}
+            </div>
           </AccordionItem>
         ))}
       </Accordion>
