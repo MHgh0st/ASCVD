@@ -11,6 +11,8 @@ import { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import type { RegisterFormData, AscvdData, AscvdResult } from "@/types/types";
 import Toast from "@/components/Toast";
+import { useSession } from "next-auth/react";
+import { Icon } from "@iconify/react";
 
 // 1. تایپ onSubmit رو به‌روزرسانی می‌کنیم تا داده‌ها رو هم ارسال کنه
 export default function RegisterForm({
@@ -20,10 +22,12 @@ export default function RegisterForm({
   ascvdData: AscvdData;
   ascvdResult: AscvdResult;
 }) {
+  const { status } = useSession();
+
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [timer, setTimer] = useState(0);
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(status === "unauthenticated");
 
   // Initialize react-hook-form
   const {
@@ -280,6 +284,12 @@ export default function RegisterForm({
           )}
           {step === 2 && (
             <>
+              <div className="absolute top-3 left-3" onClick={() => setStep(1)}>
+                <Icon
+                  icon={`solar:arrow-left-bold-duotone`}
+                  className="size-6 hover:scale-110 cursor-pointer transition-all"
+                />
+              </div>
               <p className="font-light text-sm text-center mb-4">
                 لطفا کد ارسال شده به شماره‌ی {formData.phone} را وارد کنید.
               </p>

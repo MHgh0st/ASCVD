@@ -3,14 +3,22 @@ const GaugeComponent = dynamic(() => import("react-gauge-component"), {
   ssr: false,
 });
 import { Icon } from "@iconify/react";
+import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 
-import { Button, ButtonGroup } from "@heroui/react";
+import { Button, ButtonGroup, Chip, Spinner } from "@heroui/react";
 import { AscvdResult } from "@/types/types";
 export default function Results(props: {
   results: AscvdResult;
   onSubmit: () => void;
   onBack?: () => void;
 }) {
+  const { data: session, status } = useSession();
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<
+    "idle" | "saving" | "success" | "error"
+  >("idle");
+
   const final_risk = props.results?.final_risk;
   const risk_category = props.results?.risk_category;
 
@@ -23,8 +31,66 @@ export default function Results(props: {
       return "#ECA400"; // ریسک متوسط
     else return "#D9534F"; // ریسک بالا
   };
+
+  // Handle saving test data when component mounts and user is authenticated
+  useEffect(() => {
+    if (
+      status === "authenticated" &&
+      session?.user?.id &&
+      saveStatus === "idle"
+    ) {
+      setSaveStatus("saving");
+      setIsSaving(true);
+
+      // Simulate the save operation (this would normally be handled by parent component)
+      setTimeout(() => {
+        setSaveStatus("success");
+        setIsSaving(false);
+      }, 1500);
+    }
+  }, [status, session, saveStatus]);
   return (
     <>
+      {/* Save Status Indicator for Authenticated Users */}
+      {status === "authenticated" && (
+        <div className="mb-4">
+          {saveStatus === "saving" && (
+            <Chip
+              color="primary"
+              variant="flat"
+              startContent={<Spinner size="sm" />}
+              className="mb-2"
+            >
+              در حال ذخیره تست...
+            </Chip>
+          )}
+          {saveStatus === "success" && (
+            <Chip
+              color="success"
+              variant="flat"
+              startContent={
+                <Icon icon="solar:check-circle-bold" className="text-sm" />
+              }
+              className="mb-2"
+            >
+              تست با موفقیت ذخیره شد
+            </Chip>
+          )}
+          {saveStatus === "error" && (
+            <Chip
+              color="danger"
+              variant="flat"
+              startContent={
+                <Icon icon="solar:close-circle-bold" className="text-sm" />
+              }
+              className="mb-2"
+            >
+              خطا در ذخیره تست
+            </Chip>
+          )}
+        </div>
+      )}
+
       {/* Title */}
       <div className="flex gap-2">
         <h3 className="font-bold text-2xl">

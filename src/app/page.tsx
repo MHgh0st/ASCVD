@@ -5,12 +5,14 @@ import Stepper from "@/components/stepper";
 import RegisterForm from "@/components/RegisterFrom";
 import Advices from "@/views/Advices";
 import { useState } from "react";
+import { useSession } from "next-auth/react";
 import { AscvdData, AscvdResult } from "@/types/types";
 import { AscvdCalculator } from "@/app/server/actions";
 import { getAdvices } from "@/app/server/actions";
 import type { Advice } from "@/types/AdviceTypes";
 
 const Page = () => {
+  const { data: session, status } = useSession();
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<AscvdResult>({
@@ -45,6 +47,31 @@ const Page = () => {
         setStep(2);
       }
     } else if (step === 2) {
+      // If user is authenticated, save the test data automatically
+      if (status === "authenticated" && session?.user?.id) {
+        try {
+          const response = await fetch("/api/test/save", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              testData: formData,
+              testResult: results,
+            }),
+          });
+
+          if (response.ok) {
+            console.log("تست با موفقیت برای کاربر authenticated ذخیره شد");
+          } else {
+            const errorData = await response.json();
+            console.error("خطا در ذخیره تست:", errorData.error);
+          }
+        } catch (error) {
+          console.error("خطا در اتصال به API ذخیره تست:", error);
+        }
+      }
+
       setAdvices(await getAdvices(formData, results));
       console.log("advices: ", advices);
       setStep(3);

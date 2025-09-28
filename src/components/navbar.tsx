@@ -8,6 +8,7 @@ import {
   DropdownTrigger,
   DropdownMenu,
   DropdownItem,
+  Link,
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { useRouter } from "next/navigation";
@@ -25,10 +26,12 @@ const CustomNavbar = () => {
     <>
       <Navbar maxWidth="full">
         <NavbarBrand>
-          <img src="logo.png" alt="" width={48} />
-          <p style={{ color: "#1F7674" }} className="-mb-4 text-xl">
-            هــــیلان
-          </p>
+          <Link href="/">
+            <img src="logo.png" alt="" width={48} />
+            <p style={{ color: "#1F7674" }} className="-mb-4 text-xl">
+              هــــیلان
+            </p>
+          </Link>
         </NavbarBrand>
         <NavbarContent justify="end">
           {status === "unauthenticated" && (
@@ -36,7 +39,7 @@ const CustomNavbar = () => {
               color="primary"
               className="text-content3 "
               startContent={
-                <Icon icon="solar:login-3-bold-duotone" className="size-6" />
+                <Icon icon="solar:login-3-bold-duotone" className="size-5" />
               }
               onPress={handleLoginClick}
             >
@@ -66,6 +69,7 @@ const CustomNavbar = () => {
                   startContent={
                     <Icon icon={`solar:user-bold-duotone`} className="size-5" />
                   }
+                  onPress={() => router.push("/profile")}
                 >
                   پروفایل
                 </DropdownItem>

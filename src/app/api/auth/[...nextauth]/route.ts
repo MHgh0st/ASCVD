@@ -3,8 +3,9 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { supabase } from "@/utils/supabaseClient";
 import bcrypt from "bcrypt";
 import type { User } from "@/types/types";
+import { AuthOptions } from "next-auth";
 
-const handler = NextAuth({
+export const authOptions: AuthOptions = {
   providers: [
     // ما از CredentialsProvider استفاده می‌کنیم چون یک سیستم لاگین سفارشی داریم
     CredentialsProvider({
@@ -75,6 +76,8 @@ const handler = NextAuth({
     strategy: "jwt", // استفاده از JSON Web Tokens برای مدیریت سشن
   },
   secret: process.env.NEXTAUTH_SECRET, // یک کلید امن برای رمزنگاری توکن‌ها
-});
+};
+
+const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };
