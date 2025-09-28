@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { supabase } from "@/utils/supabaseClient";
 // Assuming your NextAuth handler is exported from this path
-import { authOptions } from "../auth/[...nextauth]/route";
+import { authOptions } from "@/app/server/AuthOptions";
 import { filterAdvices } from "@/utils/filterAdvices";
 import type { AscvdData, AscvdResult } from "@/types/types";
 import type { Advice } from "@/types/AdviceTypes";

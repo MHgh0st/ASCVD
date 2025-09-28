@@ -1,7 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { supabase } from "@/utils/supabaseClient";
-import { authOptions } from "../../auth/[...nextauth]/route";
+import { authOptions } from "@/app/server/AuthOptions";
 import type { AscvdData, AscvdResult } from "@/types/types";
 
 export async function POST(request: NextRequest) {
