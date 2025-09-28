@@ -96,7 +96,7 @@ const Page = () => {
           )}
           {step === 3 && (
             <>
-              <RegisterForm />
+              <RegisterForm ascvdData={formData} ascvdResult={results} />
               <Advices onBack={onBack} advices={advices} />
             </>
           )}

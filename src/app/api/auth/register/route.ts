@@ -1,63 +1,94 @@
 import { NextResponse, NextRequest } from "next/server";
-import type { RegisterFormData } from "@/types/types";
+import type { RegisterFormData, AscvdData, AscvdResult } from "@/types/types";
 import { supabase } from "@/utils/supabaseClient";
 import bcrypt from "bcrypt";
 
 export async function POST(request: NextRequest) {
   try {
-    const { name, phone, password }: RegisterFormData = await request.json();
+    // ۱. دریافت تمام داده‌ها از کلاینت
+    const { registrationData, testData, testResult } = await request.json();
+    const { name, phone, password }: RegisterFormData = registrationData;
 
-    // Basic validation
-    if (!name || !phone || !password) {
+    // ولیدیشن اولیه
+    if (!name || !phone || !password || !testData || !testResult) {
       return NextResponse.json(
-        { error: "تمام فیلدها الزامی هستند." },
+        { error: "داده‌های ارسالی ناقص است." },
         { status: 400 }
       );
     }
 
-    const { data: existingUser, error: findError } = await supabase
-      .from("users") // نام جدول شما
+    // ۲. چک کردن کاربر تکراری (بدون تغییر)
+    const { data: existingUser } = await supabase
+      .from("users")
       .select("phone")
-      .eq("phone", phone) // جستجو بر اساس شماره موبایل
-      .single(); // .single() اگر رکوردی پیدا شود آن را برمی‌گرداند، در غیر این صورت null
-
-    if (findError && findError.code !== "PGRST116") {
-      // نادیده گرفتن خطای "عدم وجود ردیف" و بررسی سایر خطاهای احتمالی دیتابیس
-      throw findError;
-    }
+      .eq("phone", phone)
+      .single();
 
     if (existingUser) {
       return NextResponse.json(
         { error: "این شماره موبایل قبلاً ثبت‌نام کرده است." },
-        { status: 409 } // 409 Conflict یک کد وضعیت مناسب برای این حالت است
+        { status: 409 }
       );
     }
 
-    const saltRounds = 10; // تعداد دورهای هش کردن (استاندارد)
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    // ۳. هش کردن رمز عبور (بدون تغییر)
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-    const { data, error: insertError } = await supabase
+    // ۴. ساخت کاربر جدید و دریافت id او
+    const { data: newUser, error: insertUserError } = await supabase
       .from("users")
       .insert([
         {
-          fullName: name, // مطمئن شوید نام ستون‌ها با دیتابیس شما مطابقت دارد
+          fullName: name,
           phone: phone,
-          password: hashedPassword, // ذخیره رمز عبور هش شده
+          password: hashedPassword,
         },
       ])
-      .select();
+      .select("id") // فقط id کاربر جدید را برمی‌گردانیم
+      .single();
 
-    if (insertError) {
-      // اگر در زمان ساخت ردیف جدید خطایی رخ دهد
-      throw insertError;
+    if (insertUserError || !newUser) {
+      throw insertUserError || new Error("کاربر جدید ساخته نشد.");
+    }
+
+    const userId = newUser.id;
+
+    // ۵. ذخیره کردن نتایج تست در جدول tests با استفاده از userId
+    const { error: insertTestError } = await supabase
+      .from("ascvd_test")
+      .insert([
+        {
+          user_id: userId, // اتصال تست به کاربر جدید
+          age: testData.age,
+          sex: testData.sex,
+          total_cholesterol: testData.cholesterol,
+          hdl_cholesterol: testData.HDLCholesterol,
+          ldl_cholesterol: testData.LDLCholesterol,
+          systolic_bp: testData.bloodPressureSystolic,
+          diastolic_bp: testData.bloodPressureDiastolic,
+          has_diabetes: testData.diabetes === "yes",
+          is_smoker: testData.smoke,
+          quit_duration: testData.quitDuration,
+          on_bp_medicine: testData.bloodPreasureMedicine === "yes",
+          final_risk: testResult.final_risk,
+          risk_category: testResult.risk_category,
+        },
+      ]);
+
+    if (insertTestError) {
+      // اگر ذخیره تست با خطا مواجه شد (برای عیب‌یابی)
+      console.error("Error saving test data:", insertTestError);
+      // اینجا می‌توانید تصمیم بگیرید که آیا کاربر ساخته شده را حذف کنید یا نه
+      // اما برای MVP، فقط لاگ کردن خطا کافی است
+      throw new Error(insertTestError.message);
     }
 
     return NextResponse.json(
-      { message: "ثبت‌نام با موفقیت انجام شد.", user: data },
-      { status: 201 } // 201 Created
+      { message: "ثبت‌نام و ذخیره تست با موفقیت انجام شد.", userId: userId },
+      { status: 201 }
     );
   } catch (error: any) {
-    console.error("Error during registration:", error);
+    console.error("Error during registration and test save:", error);
     return NextResponse.json(
       { error: error.message || "یک خطای غیرمنتظره در سرور رخ داد." },
       { status: 500 }

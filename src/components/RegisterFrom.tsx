@@ -9,11 +9,17 @@ import {
 } from "@heroui/react";
 import { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
-import type { RegisterFormData } from "@/types/types";
+import type { RegisterFormData, AscvdData, AscvdResult } from "@/types/types";
 import Toast from "@/components/Toast";
 
 // 1. تایپ onSubmit رو به‌روزرسانی می‌کنیم تا داده‌ها رو هم ارسال کنه
-export default function RegisterForm() {
+export default function RegisterForm({
+  ascvdData,
+  ascvdResult,
+}: {
+  ascvdData: AscvdData;
+  ascvdResult: AscvdResult;
+}) {
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [timer, setTimer] = useState(0);
@@ -128,7 +134,11 @@ export default function RegisterForm() {
         "Content-Type": "application/json",
       },
       method: "POST",
-      body: JSON.stringify(data),
+      body: JSON.stringify({
+        registrationData: data, // داده‌های ثبت‌نام (نام، موبایل، پسورد)
+        testData: ascvdData, // داده‌های ورودی تست
+        testResult: ascvdResult, // نتیجه تست
+      }),
     });
     if (!response.ok) {
       const resData = await response.json();
