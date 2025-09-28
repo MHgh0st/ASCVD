@@ -4,11 +4,12 @@ const GaugeComponent = dynamic(() => import("react-gauge-component"), {
 });
 import { Icon } from "@iconify/react";
 
-import { Button } from "@heroui/react";
+import { Button, ButtonGroup } from "@heroui/react";
 import { AscvdResult } from "@/types/types";
 export default function Results(props: {
   results: AscvdResult;
   onSubmit: () => void;
+  onBack?: () => void;
 }) {
   const final_risk = props.results?.final_risk;
   const risk_category = props.results?.risk_category;
@@ -103,18 +104,30 @@ export default function Results(props: {
           نفر از آنها دچار بیماری های قلبی و عروقی خواهند شد
         </p>
       </div>
-      <Button
-        color="primary"
-        className="text-content3 mt-4"
-        endContent={
-          <Icon icon="solar:arrow-left-bold-duotone" className="text-xl" />
-        }
-        onPress={() => {
-          props.onSubmit();
-        }}
-      >
-        دیدن توصیه ها و راهکارها
-      </Button>
+      <ButtonGroup className="mt-4">
+        {props.onBack && (
+          <Button
+            color="primary"
+            variant="bordered"
+            onPress={props.onBack}
+            isIconOnly
+          >
+            <Icon icon="solar:arrow-right-bold-duotone" className="text-xl" />
+          </Button>
+        )}
+        <Button
+          color="primary"
+          className="text-content3"
+          endContent={
+            <Icon icon="solar:arrow-left-bold-duotone" className="text-xl" />
+          }
+          onPress={() => {
+            props.onSubmit();
+          }}
+        >
+          دیدن توصیه ها و راهکارها
+        </Button>
+      </ButtonGroup>
     </>
   );
 }

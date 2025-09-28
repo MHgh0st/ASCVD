@@ -1,8 +1,16 @@
 "use client";
 import { Icon } from "@iconify/react";
-import { Form, NumberInput, Button, ButtonGroup } from "@heroui/react";
-import React from "react";
+import {
+  Form,
+  NumberInput,
+  Button,
+  ButtonGroup,
+  Select,
+  SelectItem,
+} from "@heroui/react";
+import React, { useEffect } from "react";
 import type { AscvdData } from "@/types/types";
+import { QuitDuration } from "@/types/types";
 
 type Options = {
   label: string;
@@ -109,23 +117,38 @@ const numberInputFields: NumberInputConfig[] = [
 const InformationForm = (props: {
   onSubmit: (data: AscvdData) => void;
   isLoading: boolean;
+  initialData?: AscvdData;
 }) => {
-  const [formData, setFormData] = React.useState<AscvdData>({
-    age: 58,
-    cholesterol: 141,
-    bloodPressureSystolic: 150,
-    bloodPressureDiastolic: 90,
-    HDLCholesterol: 34,
-    LDLCholesterol: 50,
-    sex: "male",
-    diabetes: "no",
-    smoke: "no",
-    bloodPreasureMedicine: "no",
-  });
+  const [formData, setFormData] = React.useState<AscvdData>(
+    props.initialData || {
+      age: 58,
+      cholesterol: 141,
+      bloodPressureSystolic: 150,
+      bloodPressureDiastolic: 90,
+      HDLCholesterol: 34,
+      LDLCholesterol: 50,
+      sex: "male",
+      diabetes: "no",
+      smoke: "no",
+      quitDuration: undefined,
+      bloodPreasureMedicine: "no",
+    }
+  );
 
   const handleChange = React.useCallback((key: keyof AscvdData, value: any) => {
     setFormData((prev) => ({ ...prev, [key]: value }));
   }, []);
+
+  // Update form data when initialData prop changes
+  useEffect(() => {
+    if (props.initialData) {
+      console.log(
+        "InformationForm: Updating form data with initialData:",
+        props.initialData
+      );
+      setFormData(props.initialData);
+    }
+  }, [props.initialData]);
 
   const validateNumericField = (value: number, config: NumberInputConfig) => {
     if (value === null || value === undefined || isNaN(value)) {
@@ -141,16 +164,21 @@ const InformationForm = (props: {
     <>
       <div className="flex items-end gap-2">
         <h1 className="font-bold text-3xl">تست سلامت قلبی و عروقی (ASCVD)</h1>
-        <span>
+        {/* <span>
           <Icon
             icon="solar:question-square-bold-duotone"
             className="text-xl cursor-pointer text-gray-500"
           />
-        </span>
+        </span> */}
       </div>
+      <p className="mt-2 font-medium text-sm text-content3/60">
+        این محاسبه گر تنها برای افرادی کاربرد دارد که سابقه هیچ گونه ابتلایی به
+        بیماری های قلبی عروقی ناشی از آترواسکلروز از قبیل سکته قلبی و مغزی،
+        ندارند.
+      </p>
 
       <Form
-        className="grid grid-cols-1 md:grid-cols-12 gap-x-14 gap-y-14 mt-10"
+        className="grid grid-cols-1 md:grid-cols-12 gap-x-14 gap-y-14 mt-6 "
         onSubmit={(e) => {
           e.preventDefault();
           props.onSubmit(formData);
@@ -172,6 +200,7 @@ const InformationForm = (props: {
                 errorMessage={errorMessage}
                 isInvalid={errorMessage !== null}
                 labelPlacement="outside"
+                value={formData[field.name] as number}
                 onValueChange={(value) => handleChange(field.name, value)}
               />
             );
@@ -232,6 +261,31 @@ const InformationForm = (props: {
             selectedValue={formData.smoke}
             onValueChange={(value) => handleChange("smoke", value)}
           />
+
+          {formData.smoke === "former" && (
+            <Select
+              label="چه مدتیه که سیگار رو ترک کردید"
+              placeholder="مدت زمان ترک سیگار را انتخاب کنید"
+              selectedKeys={
+                formData.quitDuration ? [formData.quitDuration] : []
+              }
+              onSelectionChange={(keys) => {
+                const selectedValue = Array.from(keys)[0] as QuitDuration;
+                handleChange("quitDuration", selectedValue);
+              }}
+            >
+              <SelectItem key={QuitDuration.LESS_THAN_ONE_MONTH}>
+                کمتر از یک ماه
+              </SelectItem>
+              <SelectItem key={QuitDuration.LESS_THAN_SIX_MONTHS}>
+                کمتر از 6 ماه
+              </SelectItem>
+              <SelectItem key={QuitDuration.MORE_THAN_SIX_MONTHS}>
+                بیشتر از 6 ماه
+              </SelectItem>
+            </Select>
+          )}
+
           <RadioButtonGroup
             label="آیا داروی فشار خون مصرف میکنید؟"
             options={[

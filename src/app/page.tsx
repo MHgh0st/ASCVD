@@ -10,6 +10,8 @@ import { AscvdCalculator } from "@/app/server/actions";
 import type { MobileFormData } from "@/types/types";
 import { addToast } from "@heroui/react";
 import { Icon } from "@iconify/react";
+import { getAdvices } from "@/app/server/actions";
+import type { Advice } from "@/types/AdviceTypes";
 
 const Page = () => {
   const [step, setStep] = useState(1);
@@ -19,19 +21,52 @@ const Page = () => {
     final_risk: 0,
     risk_category: "low",
   });
+  const [advices, setAdvices] = useState<Advice[]>([]);
+  const [formData, setFormData] = useState<AscvdData>({
+    age: 58,
+    cholesterol: 141,
+    bloodPressureSystolic: 150,
+    bloodPressureDiastolic: 90,
+    HDLCholesterol: 34,
+    LDLCholesterol: 50,
+    sex: "male",
+    diabetes: "no",
+    smoke: "no",
+    quitDuration: undefined,
+    bloodPreasureMedicine: "no",
+  });
 
-  const onSubmit = async (formData?: AscvdData) => {
+  const onSubmit = async (submittedFormData?: AscvdData) => {
     if (step === 1) {
-      setIsLoading(true);
-      const data = (await AscvdCalculator(formData!)) as AscvdResult;
-      setResults(data);
-      console.log("results: ", data);
-      setStep(2);
+      // Save the form data before moving to next step
+      if (submittedFormData) {
+        setFormData(submittedFormData);
+        // Use the submitted data directly for navigation to ensure we have the latest values
+        setIsLoading(true);
+        const data = (await AscvdCalculator(submittedFormData)) as AscvdResult;
+        setResults(data);
+        console.log("form data: ", submittedFormData);
+        setStep(2);
+      }
     } else if (step === 2) {
+      setAdvices(await getAdvices(formData, results));
+      console.log("advices: ", advices);
       setStep(3);
-      console.log("going to step 3...");
     }
     setIsLoading(false);
+  };
+
+  const onBack = () => {
+    if (step > 1) {
+      setStep(step - 1);
+      console.log("going back to step", step - 1);
+      console.log("current formData when going back:", formData);
+    }
+  };
+
+  // Helper function to handle step navigation with form data persistence
+  const navigateToStep = (targetStep: number) => {
+    setStep(targetStep);
   };
 
   const SubmitMobileForm = (data: MobileFormData) => {
@@ -75,16 +110,28 @@ const Page = () => {
         </div>
         <div className="col-span-9">
           {step === 1 && (
-            <InformationForm onSubmit={onSubmit} isLoading={isLoading} />
+            <>
+              {console.log(
+                "Page: Rendering InformationForm with initialData:",
+                formData
+              )}
+              <InformationForm
+                onSubmit={onSubmit}
+                isLoading={isLoading}
+                initialData={formData}
+              />
+            </>
           )}
-          {step === 2 && <Results results={results} onSubmit={onSubmit} />}
+          {step === 2 && (
+            <Results results={results} onSubmit={onSubmit} onBack={onBack} />
+          )}
           {step === 3 && (
             <>
               {/* <MobileForm
                 isOpen={isMobileFormOpen}
                 onSubmit={SubmitMobileForm}
               /> */}
-              <Advices />
+              <Advices onBack={onBack} advices={advices} />
             </>
           )}
         </div>
