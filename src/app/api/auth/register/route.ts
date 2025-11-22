@@ -1,6 +1,6 @@
 import { NextResponse, NextRequest } from "next/server";
 import type { RegisterFormData, AscvdData, AscvdResult } from "@/types/types";
-import { supabase } from "@/utils/supabaseClient";
+import prisma from "@/utils/prisma"; // استفاده از کلاینت پریسما
 import bcrypt from "bcrypt";
 
 export async function POST(request: NextRequest) {
@@ -17,12 +17,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // ۲. چک کردن کاربر تکراری (بدون تغییر)
-    const { data: existingUser } = await supabase
-      .from("users")
-      .select("phone")
-      .eq("phone", phone)
-      .single();
+    // ۲. چک کردن کاربر تکراری با استفاده از findUnique
+    // (چون در مرحله قبل @unique را به phone اضافه کردیم، این دستور کار می‌کند)
+    const existingUser = await prisma.users.findUnique({
+      where: { phone: phone },
+      select: { id: true }, // فقط چک می‌کنیم هست یا نه
+    });
 
     if (existingUser) {
       return NextResponse.json(
@@ -31,34 +31,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // ۳. هش کردن رمز عبور (بدون تغییر)
+    // ۳. هش کردن رمز عبور
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // ۴. ساخت کاربر جدید و دریافت id او
-    const { data: newUser, error: insertUserError } = await supabase
-      .from("users")
-      .insert([
-        {
+    // ۴. استفاده از Transaction برای تضمین یکپارچگی داده‌ها
+    // یا هر دو (کاربر و تست) ذخیره می‌شوند، یا هیچکدام.
+    const createdUser = await prisma.$transaction(async (tx) => {
+      // الف) ساخت کاربر جدید
+      const newUser = await tx.users.create({
+        data: {
           fullName: name,
           phone: phone,
           password: hashedPassword,
         },
-      ])
-      .select("id") // فقط id کاربر جدید را برمی‌گردانیم
-      .single();
+      });
 
-    if (insertUserError || !newUser) {
-      throw insertUserError || new Error("کاربر جدید ساخته نشد.");
-    }
-
-    const userId = newUser.id;
-
-    // ۵. ذخیره کردن نتایج تست در جدول tests با استفاده از userId
-    const { error: insertTestError } = await supabase
-      .from("ascvd_test")
-      .insert([
-        {
-          user_id: userId, // اتصال تست به کاربر جدید
+      // ب) ذخیره تست و اتصال آن به کاربر جدید
+      await tx.tests.create({
+        data: {
+          user_id: newUser.id, // استفاده از آیدی کاربری که همین الان ساخته شد
           age: testData.age,
           sex: testData.sex,
           total_cholesterol: testData.cholesterol,
@@ -66,29 +57,40 @@ export async function POST(request: NextRequest) {
           ldl_cholesterol: testData.LDLCholesterol,
           systolic_bp: testData.bloodPressureSystolic,
           diastolic_bp: testData.bloodPressureDiastolic,
-          has_diabetes: testData.diabetes === "yes",
+
+          // تبدیل Boolean ها
+          has_diabetes: testData.diabetes === "yes" ? 1 : 0,
           is_smoker: testData.smoke,
-          quit_duration: testData.quitDuration,
-          on_bp_medicine: testData.bloodPreasureMedicine === "yes",
+          quit_duration: testData.quitDuration || null, // مدیریت undefined
+          on_bp_medicine: testData.bloodPreasureMedicine === "yes" ? 1 : 0,
+
           final_risk: testResult.final_risk,
           risk_category: testResult.risk_category,
         },
-      ]);
+      });
 
-    if (insertTestError) {
-      // اگر ذخیره تست با خطا مواجه شد (برای عیب‌یابی)
-      console.error("Error saving test data:", insertTestError);
-      // اینجا می‌توانید تصمیم بگیرید که آیا کاربر ساخته شده را حذف کنید یا نه
-      // اما برای MVP، فقط لاگ کردن خطا کافی است
-      throw new Error(insertTestError.message);
-    }
+      return newUser; // بازگرداندن اطلاعات کاربر برای پاسخ نهایی
+    });
 
     return NextResponse.json(
-      { message: "ثبت‌نام و ذخیره تست با موفقیت انجام شد.", userId: userId },
+      {
+        message: "ثبت‌نام و ذخیره تست با موفقیت انجام شد.",
+        userId: createdUser.id,
+      },
       { status: 201 }
     );
   } catch (error: any) {
     console.error("Error during registration and test save:", error);
+
+    // مدیریت خطاهای خاص پریسما (اختیاری)
+    // کد P2002 یعنی محدودیت یکتا بودن (Unique Constraint) نقض شده است
+    if (error.code === "P2002") {
+      return NextResponse.json(
+        { error: "این شماره موبایل قبلاً ثبت‌نام کرده است." },
+        { status: 409 }
+      );
+    }
+
     return NextResponse.json(
       { error: error.message || "یک خطای غیرمنتظره در سرور رخ داد." },
       { status: 500 }

@@ -1,0 +1,51 @@
+generator client {
+  provider = "prisma-client-js"
+  // output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model tests {
+  id                String           @id @default(uuid())
+  created_at        DateTime         @default(now()) @db.Timestamp(0)
+  user_id           String           
+  age               Int?             @db.SmallInt
+  sex               tests_sex?
+  total_cholesterol Int?             @db.SmallInt
+  hdl_cholesterol   Int?             @db.SmallInt
+  ldl_cholesterol   Int?             @db.SmallInt
+  systolic_bp       Int?             @db.SmallInt
+  diastolic_bp      Int?             @db.SmallInt
+  has_diabetes      Int?             @db.TinyInt
+  is_smoker         tests_is_smoker?
+  quit_duration     String?          @db.VarChar(255)
+  on_bp_medicine    Int?             @db.TinyInt
+  final_risk        Float?           @db.Float
+  risk_category     String?          @db.VarChar(45)
+  users             users?           @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "tests_ibfk_1")
+
+  @@index([user_id], map: "user_id")
+}
+
+model users {
+  id         String           @id @default(uuid())
+  created_at DateTime @default(now()) @db.Timestamp(0)
+  fullName   String?  @db.VarChar(255)
+  password   String?  @db.VarChar(255)
+  phone      String? @unique  @db.VarChar(20)
+  tests      tests[]
+}
+
+enum tests_sex {
+  male
+  female
+}
+
+enum tests_is_smoker {
+  yes
+  no
+  former
+}

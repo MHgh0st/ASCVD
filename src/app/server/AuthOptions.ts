@@ -1,8 +1,7 @@
 import CredentialsProvider from "next-auth/providers/credentials";
-import { supabase } from "@/utils/supabaseClient";
 import bcrypt from "bcrypt";
 import { AuthOptions } from "next-auth";
-
+import prisma from "@/utils/prisma";
 export const authOptions: AuthOptions = {
   providers: [
     CredentialsProvider({
@@ -17,14 +16,11 @@ export const authOptions: AuthOptions = {
           throw new Error("شماره موبایل و رمز عبور الزامی است.");
         }
 
-        // ۱. کاربر را با شماره موبایل در دیتابیس پیدا کن
-        const { data: user, error } = await supabase
-          .from("users") // نام جدول کاربران شما
-          .select("*")
-          .eq("phone", credentials.phone)
-          .single();
+        const user = await prisma.users.findUnique({
+          where: { phone: credentials.phone },
+        });
 
-        if (error || !user) {
+        if (!user) {
           throw new Error("کاربری با این شماره موبایل یافت نشد.");
         }
 
