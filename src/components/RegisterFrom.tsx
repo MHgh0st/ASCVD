@@ -28,6 +28,7 @@ export default function RegisterForm({
   const [isLoading, setIsLoading] = useState(false);
   const [timer, setTimer] = useState(0);
   const [isOpen, setIsOpen] = useState(status === "unauthenticated");
+  const [otpHash, setOtpHash] = useState<string>();
 
   // Initialize react-hook-form
   const {
@@ -62,6 +63,11 @@ export default function RegisterForm({
       return () => clearInterval(interval);
     }
   }, [timer]);
+  useEffect(() => {
+    if (step === 2) {
+      setTimer(30);
+    }
+  }, [step]);
 
   const validateStep1 = () => {
     let isValid = true;
@@ -132,7 +138,6 @@ export default function RegisterForm({
   };
 
   const handleRegister = async (data: RegisterFormData) => {
-    // TODO: در اینجا باید api مربوط به ثبت نام کاربر رو فراخوانی کنی
     const response = await fetch("/api/auth/register", {
       headers: {
         "Content-Type": "application/json",
@@ -166,43 +171,90 @@ export default function RegisterForm({
     setIsOpen(false);
   };
 
-  const handleRequestOtp = () => {
+  const sendOTP = async (phoneNumber: string) => {
+    const response = await fetch("/api/requestOTP", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        phoneNumber: phoneNumber,
+      }),
+    });
+    const resData = await response.json();
+    if (response.ok) {
+      Toast({
+        title: `کد ورود با موفقیت به شماره ی ${phoneNumber} ارسال شد`,
+        type: "success",
+      });
+      return resData.hash;
+    } else {
+      Toast({
+        title: "ارسال کد با خطا مواجه شد",
+        message: resData.error,
+        type: "error",
+      });
+      return "";
+    }
+  };
+
+  const handleRequestOtp = async () => {
     if (validateStep1()) {
       setIsLoading(true);
-      // TODO: در اینجا باید API درخواست ارسال OTP رو صدا بزنی
-      console.log("Requesting OTP for:", formData.phone);
-      // شبیه‌سازی تأخیر شبکه
-      setTimeout(() => {
-        setIsLoading(false);
+      const hash = await sendOTP(formData.phone);
+      if (hash !== "") {
+        setOtpHash(hash);
         setStep(2);
-        setTimer(30); // شروع تایمر
-      }, 1000);
+      }
+      setIsLoading(false);
     }
   };
 
   const handleVerifyOtp = async () => {
     if (validateStep2()) {
       setIsLoading(true);
-      // console.log("Verifying OTP:", formData.otp);
-      if (formData.otp === "12345") {
+      const otpRes = await fetch("/api/verifyOTP", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          phoneNumber: formData.phone,
+          hash: otpHash,
+          otp: formData.otp,
+        }),
+      });
+
+      const data = await otpRes.json();
+
+      if (data.isCorrect) {
         await handleRegister(formData);
-        setIsLoading(false);
       } else {
-        setTimeout(() => {
-          setIsLoading(false);
-          setError("otp", {
-            message: "کد تایید اشتباه است. لطفا دوباره تلاش کنید.",
-          });
-        }, 1000);
+        // setTimeout(() => {
+        //   setIsLoading(false);
+        //   setError("otp", {
+        //     message: "کد تایید اشتباه است. لطفا دوباره تلاش کنید.",
+        //   });
+        // }, 1000);
+        Toast({
+          title: "کد تایید اشتباه است، لطفا دوباره تلاش کنید.",
+          type: "error",
+        });
       }
+      setIsLoading(false);
     }
   };
 
-  const handleResendCode = () => {
+  const handleResendCode = async () => {
     if (timer === 0) {
-      // TODO: در اینجا باید API درخواست ارسال مجدد OTP رو صدا بزنی
+      setIsLoading(true);
       console.log("Resending OTP for:", formData.phone);
-      setTimer(30); // ریست کردن تایمر
+      const hash = await sendOTP(formData.phone);
+      if (hash !== "") {
+        setOtpHash(hash);
+      }
+      setIsLoading(false);
+      setTimer(30);
     }
   };
 

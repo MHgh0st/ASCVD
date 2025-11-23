@@ -8,11 +8,11 @@ export default function Toast({
   type,
 }: {
   title?: string;
-  message: string;
+  message?: string;
   type: "success" | "error";
 }) {
   addToast({
-    title: type === "success" ? title : "خظایی رخ داد!",
+    title: type === "success" ? title : title ? title : "خطایی رخ داد!",
     description: message,
     color: type === "success" ? "success" : "danger",
     timeout: 4000,
